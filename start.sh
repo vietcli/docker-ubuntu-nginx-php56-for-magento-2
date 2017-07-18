@@ -10,17 +10,28 @@ if [ ! -f /vietcli-pw.txt ]; then
     echo "root:$ROOT_PASSWORD" | chpasswd
 
     #This is so the passwords show up in logs.
+    mkdir /home/vietcli/.log
     echo root password: $ROOT_PASSWORD
     echo vietcli password: $VIETCLI_PASSWORD
-    echo $ROOT_PASSWORD > /root-pw.txt
-    echo $VIETCLI_PASSWORD > /vietcli-pw.txt
+    echo $ROOT_PASSWORD > /home/vietcli/.log/root-pw.txt
+    echo $VIETCLI_PASSWORD > /home/vietcli/.log/vietcli-pw.txt
 
+    # Enable Magento 2 site
+    ln -s /etc/nginx/sites-available/magento2.conf /etc/nginx/sites-enabled/
+
+    # Add Magento configuration
+    mkdir /etc/nginx/conf.d/ext
+    ln -s /home/vietcli/files/html/nginx.conf.sample /etc/nginx/conf.d/ext/magento2.conf
 fi
 
-if [ ! -f /home/vietcli/files/html/nginx.conf.sample ]; then
-    touch /home/vietcli/files/html/nginx.conf.sample
-    chown -R magento: /home/vietcli/files/html/
+# Check HTTP_SERVER_NAME environment variable to set Virtual Host Name
+if [ -z "$HTTP_SERVER_NAME" ]; then
+	echo "HTTP_SERVER_NAME is empty"
+else
+    sed -i "s/magento2.local/${HTTP_SERVER_NAME}/" /etc/nginx/sites-available/magento2.conf
+    service nginx restart
+    service php5.6-fpm restart
 fi
 
-# start all the services
-/usr/local/bin/supervisord -n -c /etc/supervisord.conf
+# run SSH
+/usr/sbin/sshd -D
