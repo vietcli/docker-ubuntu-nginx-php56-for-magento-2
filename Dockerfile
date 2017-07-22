@@ -87,7 +87,11 @@ RUN wget http://downloads3.ioncube.com/loader_downloads/ioncube_loaders_lin_x86-
  && mkdir -p $PHP_EXT_DIR \
  && cp "ioncube/ioncube_loader_lin_${PHP_VERSION}.so" $PHP_EXT_DIR \
  && cp "ioncube/ioncube_loader_lin_${PHP_VERSION}_ts.so" $PHP_EXT_DIR \
-&& rm -rf ioncube ioncube_loaders_lin_x86-64.tar.gz
+&& rm -rf ioncube ioncube_loaders_lin_x86-64.tar.gz \
+&& sed -i "925i " /etc/php/${PHP_VERSION}/fpm/php.ini \
+&& sed -i "925i zend_extension = ${PHP_EXT_DIR}/ioncube_loader_lin_${PHP_VERSION}.so" /etc/php/${PHP_VERSION}/fpm/php.ini \
+&& sed -i "925i " /etc/php/${PHP_VERSION}/cli/php.ini \
+&& sed -i "925i zend_extension = ${PHP_EXT_DIR}/ioncube_loader_lin_${PHP_VERSION}.so" /etc/php/${PHP_VERSION}/cli/php.ini
 
 # Reload PHP Configurations
 
